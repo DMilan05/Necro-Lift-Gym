@@ -1,1 +1,34 @@
 @import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Butcherman&family=Metal+Mania&family=Oswald:wght@400;500;600;700&display=swap');
+
+@theme {
+  --color-void: #0a0908;
+  --color-blood: #8a0303;
+  --color-bone: #d8d2c4;
+  --color-ember: #b5490f;
+  --color-ash: #3a3630;
+  --color-rot: #4a5a3a;
+}
+
+body {
+  background-color: var(--color-void);
+  color: var(--color-bone);
+  font-family: 'Oswald', sans-serif;
+}
+
+.brutal-bg {
+  position: relative;
+  background-color: var(--color-void);
+  background-image:
+    radial-gradient(circle at 15% 10%, rgba(138,3,3,0.10), transparent 40%),
+    radial-gradient(circle at 85% 80%, rgba(74,90,58,0.05), transparent 35%);
+}
+
+.brutal-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}

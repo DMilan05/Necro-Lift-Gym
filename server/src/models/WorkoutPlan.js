@@ -45,6 +45,18 @@ const workoutPlanSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  splitType: {
+    type: String,
+    enum: ['bro_split', 'upper_lower', 'ppl', 'ppl_ul', 'egyeb'],
+    required: true,
+  },
+  customSplitType: {
+    type: String,
+    trim: true,
+    required: function () {
+      return this.splitType === 'egyeb';
+    },
+  },
   days: [dayPlanSchema],
 }, { timestamps: true });
 

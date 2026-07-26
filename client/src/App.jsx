@@ -2,14 +2,8 @@ import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import UsersPage from './pages/UsersPage';
 import Logo from './components/Logo';
 import TornDivider from './components/TornDivider';
-
-function MembershipsPage() {
-  return <div className="p-6">Bérletek oldal — hamarosan.</div>;
-}
-
-function WorkoutPlansPage() {
-  return <div className="p-6">Edzéstervek oldal — hamarosan.</div>;
-}
+import MembershipsPage from './pages/MembershipsPage';
+import WorkoutPlansPage from './pages/WorkoutPlansPage';
 
 function App() {
   return (

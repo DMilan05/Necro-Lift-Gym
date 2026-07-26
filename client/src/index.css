@@ -32,3 +32,80 @@ body {
   opacity: 0.06;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
 }
+
+@theme {
+  --color-void: #0a0908;
+  --color-blood: #8a0303;
+  --color-bone: #d8d2c4;
+  --color-ember: #b5490f;
+  --color-ash: #3a3630;
+  --color-rot: #4a5a3a;
+  --color-thrive: #7a9b5c;
+}
+
+.input-brutal {
+  background-color: var(--color-void);
+  border: 1px solid var(--color-blood);
+  color: var(--color-bone);
+  padding: 0.55rem 0.75rem;
+  border-radius: 0.25rem;
+  width: 100%;
+  font-family: 'Oswald', sans-serif;
+}
+.input-brutal::placeholder {
+  color: #8a8378;
+}
+.input-brutal:focus {
+  outline: none;
+  border-color: var(--color-ember);
+  box-shadow: 0 0 0 2px rgba(181, 73, 15, 0.3);
+}
+
+.btn-brutal {
+  background-color: var(--color-blood);
+  color: var(--color-bone);
+  font-family: 'Oswald', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 0.6rem 1rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+.btn-brutal:hover {
+  background-color: #6e0202;
+  box-shadow: 0 0 12px rgba(138, 3, 3, 0.45);
+}
+
+.icon-btn-brutal {
+  color: var(--color-blood);
+  border: 1px solid var(--color-ash);
+  border-radius: 0.25rem;
+  padding: 0.4rem 0.6rem;
+  transition: color 0.2s, border-color 0.2s;
+}
+.icon-btn-brutal:hover {
+  color: var(--color-ember);
+  border-color: var(--color-ember);
+}
+
+.card-brutal {
+  background-color: rgba(20, 18, 16, 0.55);
+  border: 1px solid var(--color-ash);
+  border-radius: 0.25rem;
+  padding: 1rem;
+}
+
+.section-title {
+  font-family: 'Metal Mania', cursive;
+  color: var(--color-blood);
+  text-shadow: 0 0 12px rgba(138, 3, 3, 0.3);
+}
+
+.status-active { color: var(--color-thrive); }
+.status-expired { color: var(--color-blood); }
+
+.page-shell {
+  font-family: 'Oswald', sans-serif;
+  color: var(--color-bone);
+}

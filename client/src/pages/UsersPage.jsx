@@ -30,35 +30,33 @@ function UsersPage() {
   };
 
   return (
-    <div className="p-6 max-w-xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Vendégek</h1>
+    <div className="page-shell p-6 max-w-xl mx-auto">
+      <h2 className="section-title text-3xl mb-6">Vendégek</h2>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3 mb-8">
         <input
-          className="bg-zinc-900 border border-red-900 p-2 rounded text-white"
+          className="input-brutal"
           placeholder="Név"
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
           required
         />
         <input
-          className="bg-zinc-900 border border-red-900 p-2 rounded text-white"
+          className="input-brutal"
           placeholder="Email"
           type="email"
           value={form.email}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
           required
         />
-        <button className="bg-red-800 hover:bg-red-700 text-white py-2 rounded">
-          Vendég felvétele
-        </button>
+        <button className="btn-brutal">Vendég felvétele</button>
       </form>
 
-      {error && <p className="text-red-400 mb-4">{error}</p>}
+      {error && <p className="status-expired mb-4">{error}</p>}
 
       <ul className="flex flex-col gap-2">
         {users.map((u) => (
-          <li key={u._id} className="border border-zinc-800 p-3 rounded">
+          <li key={u._id} className="card-brutal">
             {u.name} — {u.email}
           </li>
         ))}

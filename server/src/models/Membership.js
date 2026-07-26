@@ -22,7 +22,6 @@ const membershipSchema = new mongoose.Schema({
   },
   endDate: {
     type: Date,
-    required: true,
   },
 }, {
   timestamps: true,
@@ -30,7 +29,14 @@ const membershipSchema = new mongoose.Schema({
   toObject: { virtuals: true },
 });
 
-// Számított mező - mindig a lekérdezés pillanatában dől el, nem tárolt állapot
+membershipSchema.pre('save', function () {
+  if (!this.endDate) {
+    const end = new Date(this.startDate);
+    end.setDate(end.getDate() + 30);
+    this.endDate = end;
+  }
+});
+
 membershipSchema.virtual('isActive').get(function () {
   return this.endDate > new Date();
 });

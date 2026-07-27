@@ -20,4 +20,14 @@ router.post('/', async (req, res) => {
   }
 });
 
+router.delete('/:id', async (req, res) => {
+  try {
+    const plan = await WorkoutPlan.findByIdAndDelete(req.params.id);
+    if (!plan) return res.status(404).json({ error: 'Edzésterv nem található' });
+    res.status(204).send();
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 module.exports = router;

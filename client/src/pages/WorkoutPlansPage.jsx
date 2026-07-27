@@ -131,6 +131,17 @@ function WorkoutPlansPage() {
     }
   };
 
+  // --- Törlés ---
+  const handleDeletePlan = async (id) => {
+    if (!confirm('Biztosan törlöd ezt az edzéstervet?')) return;
+    try {
+      await api.deleteWorkoutPlan(id);
+      await loadData();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   const inputClass = 'input-brutal';
 
   return (
@@ -265,7 +276,12 @@ function WorkoutPlansPage() {
       <div className="flex flex-col gap-4">
         {plans.map((plan) => (
           <div key={plan._id} className="card-brutal">
-            <h3 className="section-title text-xl">{plan.title}</h3>
+            <div className="flex justify-between items-start">
+              <h3 className="section-title text-xl">{plan.title}</h3>
+              <button onClick={() => handleDeletePlan(plan._id)} className="icon-btn-brutal">
+                Törlés
+              </button>
+            </div>
             <p className="text-sm mb-2" style={{ color: 'var(--color-ash)' }}>
               {plan.user?.name} — {plan.splitType === 'egyeb' ? plan.customSplitType : SPLIT_LABELS[plan.splitType]}
             </p>

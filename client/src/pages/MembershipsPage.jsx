@@ -5,6 +5,7 @@ function MembershipsPage() {
   const [memberships, setMemberships] = useState([]);
   const [users, setUsers] = useState([]);
   const [form, setForm] = useState({ user: '', type: 'felnott', price: '' });
+  const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState(null);
 
   const loadData = async () => {
@@ -24,8 +25,34 @@ function MembershipsPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.createMembership({ ...form, price: Number(form.price) });
+      const payload = { ...form, price: Number(form.price) };
+      if (editingId) {
+        await api.updateMembership(editingId, payload);
+        setEditingId(null);
+      } else {
+        await api.createMembership(payload);
+      }
       setForm({ user: '', type: 'felnott', price: '' });
+      await loadData();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const startEdit = (m) => {
+    setEditingId(m._id);
+    setForm({ user: m.user?._id || m.user, type: m.type, price: String(m.price) });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setForm({ user: '', type: 'felnott', price: '' });
+  };
+
+  const handleDelete = async (id) => {
+    if (!confirm('Biztosan törlöd ezt a bérletet?')) return;
+    try {
+      await api.deleteMembership(id);
       await loadData();
     } catch (err) {
       setError(err.message);
@@ -58,7 +85,14 @@ function MembershipsPage() {
           required
         />
 
-        <button className="btn-brutal">Bérlet felvétele (30 napra szól a mai naptól)</button>
+        <div className="flex gap-2">
+          <button className="btn-brutal flex-1">
+            {editingId ? 'Mentés' : 'Bérlet felvétele (30 napra szól a mai naptól)'}
+          </button>
+          {editingId && (
+            <button type="button" onClick={cancelEdit} className="icon-btn-brutal">Mégse</button>
+          )}
+        </div>
       </form>
 
       {error && <p className="status-expired mb-4">{error}</p>}
@@ -71,8 +105,12 @@ function MembershipsPage() {
               <br />
               <span className="text-sm" style={{ color: 'var(--color-ash)' }}>Lejárat: {formatDate(m.endDate)}</span>
             </span>
-            <span className={m.isActive ? 'status-active' : 'status-expired'}>
-              {m.isActive ? 'Aktív' : 'Lejárt'}
+            <span className="flex items-center gap-2">
+              <span className={m.isActive ? 'status-active' : 'status-expired'}>
+                {m.isActive ? 'Aktív' : 'Lejárt'}
+              </span>
+              <button onClick={() => startEdit(m)} className="icon-btn-brutal">Szerkesztés</button>
+              <button onClick={() => handleDelete(m._id)} className="icon-btn-brutal">Törlés</button>
             </span>
           </li>
         ))}

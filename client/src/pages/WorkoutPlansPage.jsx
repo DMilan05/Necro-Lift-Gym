@@ -13,17 +13,20 @@ const SPLIT_LABELS = {
   egyeb: 'Egyéb',
 };
 
+const emptyForm = () => ({
+  user: '',
+  title: '',
+  splitType: 'upper_lower',
+  customSplitType: '',
+  days: [emptyDay()],
+});
+
 function WorkoutPlansPage() {
   const [plans, setPlans] = useState([]);
   const [users, setUsers] = useState([]);
   const [error, setError] = useState(null);
-  const [form, setForm] = useState({
-    user: '',
-    title: '',
-    splitType: 'upper_lower',
-    customSplitType: '',
-    days: [emptyDay()],
-  });
+  const [editingId, setEditingId] = useState(null);
+  const [form, setForm] = useState(emptyForm());
 
   const loadData = async () => {
     try {
@@ -100,8 +103,33 @@ function WorkoutPlansPage() {
       return { ...p, days };
     });
 
-  const resetForm = () =>
-    setForm({ user: form.user, title: '', splitType: 'upper_lower', customSplitType: '', days: [emptyDay()] });
+  // --- Szerkesztés indítása: egy meglévő terv adataival tölti fel a formot ---
+  const startEdit = (plan) => {
+    setEditingId(plan._id);
+    setForm({
+      user: plan.user?._id || plan.user,
+      title: plan.title,
+      splitType: plan.splitType,
+      customSplitType: plan.customSplitType || '',
+      days: plan.days.map((day) => ({
+        day: day.day,
+        exercises: day.exercises.map((ex) => ({
+          name: ex.name,
+          sets: ex.sets.map((s) => ({
+            weight: String(s.weight),
+            reps: s.reps !== undefined && s.reps !== null ? String(s.reps) : '',
+            toFailure: !!s.toFailure,
+          })),
+        })),
+      })),
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setForm(emptyForm());
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -123,15 +151,20 @@ function WorkoutPlansPage() {
           })),
         })),
       };
-      await api.createWorkoutPlan(payload);
-      resetForm();
+
+      if (editingId) {
+        await api.updateWorkoutPlan(editingId, payload);
+      } else {
+        await api.createWorkoutPlan(payload);
+      }
+      setEditingId(null);
+      setForm(emptyForm());
       await loadData();
     } catch (err) {
       setError(err.message);
     }
   };
 
-  // --- Törlés ---
   const handleDeletePlan = async (id) => {
     if (!confirm('Biztosan törlöd ezt az edzéstervet?')) return;
     try {
@@ -268,7 +301,14 @@ function WorkoutPlansPage() {
           + Nap hozzáadása
         </button>
 
-        <button className="btn-brutal">Edzésterv mentése</button>
+        <div className="flex gap-2">
+          <button className="btn-brutal flex-1">
+            {editingId ? 'Mentés' : 'Edzésterv mentése'}
+          </button>
+          {editingId && (
+            <button type="button" onClick={cancelEdit} className="icon-btn-brutal">Mégse</button>
+          )}
+        </div>
       </form>
 
       {error && <p className="status-expired mb-4">{error}</p>}
@@ -278,9 +318,10 @@ function WorkoutPlansPage() {
           <div key={plan._id} className="card-brutal">
             <div className="flex justify-between items-start">
               <h3 className="section-title text-xl">{plan.title}</h3>
-              <button onClick={() => handleDeletePlan(plan._id)} className="icon-btn-brutal">
-                Törlés
-              </button>
+              <span className="flex gap-2">
+                <button onClick={() => startEdit(plan)} className="icon-btn-brutal">Szerkesztés</button>
+                <button onClick={() => handleDeletePlan(plan._id)} className="icon-btn-brutal">Törlés</button>
+              </span>
             </div>
             <p className="text-sm mb-2" style={{ color: 'var(--color-ash)' }}>
               {plan.user?.name} — {plan.splitType === 'egyeb' ? plan.customSplitType : SPLIT_LABELS[plan.splitType]}

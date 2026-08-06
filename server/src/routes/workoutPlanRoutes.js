@@ -20,6 +20,16 @@ router.post('/', async (req, res) => {
   }
 });
 
+router.put('/:id', async (req, res) => {
+  try {
+    const plan = await WorkoutPlan.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    if (!plan) return res.status(404).json({ error: 'Edzésterv nem található' });
+    res.json(plan);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
 router.delete('/:id', async (req, res) => {
   try {
     const plan = await WorkoutPlan.findByIdAndDelete(req.params.id);

@@ -26,5 +26,6 @@ export const api = {
 
   getWorkoutPlans: () => request('/workout-plans'),
   createWorkoutPlan: (data) => request('/workout-plans', { method: 'POST', body: JSON.stringify(data) }),
+  updateWorkoutPlan: (id, data) => request(`/workout-plans/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteWorkoutPlan: (id) => request(`/workout-plans/${id}`, { method: 'DELETE' }),
 };

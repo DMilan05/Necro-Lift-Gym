@@ -1,3 +1,4 @@
+const getErrorMessage = require('../utils/errorMessage');
 const express = require('express');
 const router = express.Router();
 const Membership = require('../models/Membership');

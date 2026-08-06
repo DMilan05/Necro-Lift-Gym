@@ -26,15 +26,20 @@ function WorkoutPlansPage() {
   const [users, setUsers] = useState([]);
   const [error, setError] = useState(null);
   const [editingId, setEditingId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState(emptyForm());
 
   const loadData = async () => {
+    setLoading(true);
     try {
       const [p, u] = await Promise.all([api.getWorkoutPlans(), api.getUsers()]);
       setPlans(p);
       setUsers(u);
     } catch (err) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -42,7 +47,6 @@ function WorkoutPlansPage() {
     loadData();
   }, []);
 
-  // --- Napok kezelése ---
   const addDay = () => setForm((p) => ({ ...p, days: [...p.days, emptyDay()] }));
   const removeDay = (di) =>
     setForm((p) => ({ ...p, days: p.days.filter((_, i) => i !== di) }));
@@ -53,7 +57,6 @@ function WorkoutPlansPage() {
       return { ...p, days };
     });
 
-  // --- Gyakorlatok kezelése ---
   const addExercise = (di) =>
     setForm((p) => {
       const days = [...p.days];
@@ -75,7 +78,6 @@ function WorkoutPlansPage() {
       return { ...p, days };
     });
 
-  // --- Szettek kezelése ---
   const addSet = (di, ei) =>
     setForm((p) => {
       const days = [...p.days];
@@ -103,7 +105,6 @@ function WorkoutPlansPage() {
       return { ...p, days };
     });
 
-  // --- Szerkesztés indítása: egy meglévő terv adataival tölti fel a formot ---
   const startEdit = (plan) => {
     setEditingId(plan._id);
     setForm({
@@ -133,6 +134,7 @@ function WorkoutPlansPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     try {
       const payload = {
         user: form.user,
@@ -162,6 +164,8 @@ function WorkoutPlansPage() {
       await loadData();
     } catch (err) {
       setError(err.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -302,8 +306,8 @@ function WorkoutPlansPage() {
         </button>
 
         <div className="flex gap-2">
-          <button className="btn-brutal flex-1">
-            {editingId ? 'Mentés' : 'Edzésterv mentése'}
+          <button className="btn-brutal flex-1" disabled={submitting}>
+            {submitting ? 'Mentés...' : editingId ? 'Mentés' : 'Edzésterv mentése'}
           </button>
           {editingId && (
             <button type="button" onClick={cancelEdit} className="icon-btn-brutal">Mégse</button>
@@ -313,36 +317,44 @@ function WorkoutPlansPage() {
 
       {error && <p className="status-expired mb-4">{error}</p>}
 
-      <div className="flex flex-col gap-4">
-        {plans.map((plan) => (
-          <div key={plan._id} className="card-brutal">
-            <div className="flex justify-between items-start">
-              <h3 className="section-title text-xl">{plan.title}</h3>
-              <span className="flex gap-2">
-                <button onClick={() => startEdit(plan)} className="icon-btn-brutal">Szerkesztés</button>
-                <button onClick={() => handleDeletePlan(plan._id)} className="icon-btn-brutal">Törlés</button>
-              </span>
-            </div>
-            <p className="text-sm mb-2" style={{ color: 'var(--color-ash)' }}>
-              {plan.user?.name} — {plan.splitType === 'egyeb' ? plan.customSplitType : SPLIT_LABELS[plan.splitType]}
-            </p>
-            {plan.days.map((day, di) => (
-              <div key={di} className="mb-2">
-                <p className="font-semibold">{day.day}</p>
-                {day.exercises.map((ex, ei) => (
-                  <p key={ei} className="text-sm ml-3">
-                    {ex.name}: {ex.sets.map((s, si) => (
-                      <span key={si}>
-                        {s.weight}kg × {s.toFailure ? 'bukásig' : s.reps}{si < ex.sets.length - 1 ? ', ' : ''}
-                      </span>
-                    ))}
-                  </p>
-                ))}
+      {loading && <p style={{ color: 'var(--color-ash)' }}>Betöltés...</p>}
+
+      {!loading && plans.length === 0 && (
+        <p style={{ color: 'var(--color-ash)' }}>Még nincs felvéve edzésterv.</p>
+      )}
+
+      {!loading && plans.length > 0 && (
+        <div className="flex flex-col gap-4">
+          {plans.map((plan) => (
+            <div key={plan._id} className="card-brutal">
+              <div className="flex justify-between items-start">
+                <h3 className="section-title text-xl">{plan.title}</h3>
+                <span className="flex gap-2">
+                  <button onClick={() => startEdit(plan)} className="icon-btn-brutal">Szerkesztés</button>
+                  <button onClick={() => handleDeletePlan(plan._id)} className="icon-btn-brutal">Törlés</button>
+                </span>
               </div>
-            ))}
-          </div>
-        ))}
-      </div>
+              <p className="text-sm mb-2" style={{ color: 'var(--color-ash)' }}>
+                {plan.user?.name} — {plan.splitType === 'egyeb' ? plan.customSplitType : SPLIT_LABELS[plan.splitType]}
+              </p>
+              {plan.days.map((day, di) => (
+                <div key={di} className="mb-2">
+                  <p className="font-semibold">{day.day}</p>
+                  {day.exercises.map((ex, ei) => (
+                    <p key={ei} className="text-sm ml-3">
+                      {ex.name}: {ex.sets.map((s, si) => (
+                        <span key={si}>
+                          {s.weight}kg × {s.toFailure ? 'bukásig' : s.reps}{si < ex.sets.length - 1 ? ', ' : ''}
+                        </span>
+                      ))}
+                    </p>
+                  ))}
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

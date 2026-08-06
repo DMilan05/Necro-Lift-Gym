@@ -7,14 +7,19 @@ function MembershipsPage() {
   const [form, setForm] = useState({ user: '', type: 'felnott', price: '' });
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   const loadData = async () => {
+    setLoading(true);
     try {
       const [m, u] = await Promise.all([api.getMemberships(), api.getUsers()]);
       setMemberships(m);
       setUsers(u);
     } catch (err) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -24,6 +29,7 @@ function MembershipsPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     try {
       const payload = { ...form, price: Number(form.price) };
       if (editingId) {
@@ -36,6 +42,8 @@ function MembershipsPage() {
       await loadData();
     } catch (err) {
       setError(err.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -86,8 +94,8 @@ function MembershipsPage() {
         />
 
         <div className="flex gap-2">
-          <button className="btn-brutal flex-1">
-            {editingId ? 'Mentés' : 'Bérlet felvétele (30 napra szól a mai naptól)'}
+          <button className="btn-brutal flex-1" disabled={submitting}>
+            {submitting ? 'Mentés...' : editingId ? 'Mentés' : 'Bérlet felvétele (30 napra szól a mai naptól)'}
           </button>
           {editingId && (
             <button type="button" onClick={cancelEdit} className="icon-btn-brutal">Mégse</button>
@@ -97,24 +105,32 @@ function MembershipsPage() {
 
       {error && <p className="status-expired mb-4">{error}</p>}
 
-      <ul className="flex flex-col gap-2">
-        {memberships.map((m) => (
-          <li key={m._id} className="card-brutal flex justify-between items-center">
-            <span>
-              {m.user?.name} — {m.type === 'felnott' ? 'Felnőtt' : 'Diák'} — {m.price} Ft
-              <br />
-              <span className="text-sm" style={{ color: 'var(--color-ash)' }}>Lejárat: {formatDate(m.endDate)}</span>
-            </span>
-            <span className="flex items-center gap-2">
-              <span className={m.isActive ? 'status-active' : 'status-expired'}>
-                {m.isActive ? 'Aktív' : 'Lejárt'}
+      {loading && <p style={{ color: 'var(--color-ash)' }}>Betöltés...</p>}
+
+      {!loading && memberships.length === 0 && (
+        <p style={{ color: 'var(--color-ash)' }}>Még nincs felvéve bérlet.</p>
+      )}
+
+      {!loading && memberships.length > 0 && (
+        <ul className="flex flex-col gap-2">
+          {memberships.map((m) => (
+            <li key={m._id} className="card-brutal flex justify-between items-center">
+              <span>
+                {m.user?.name} — {m.type === 'felnott' ? 'Felnőtt' : 'Diák'} — {m.price} Ft
+                <br />
+                <span className="text-sm" style={{ color: 'var(--color-ash)' }}>Lejárat: {formatDate(m.endDate)}</span>
               </span>
-              <button onClick={() => startEdit(m)} className="icon-btn-brutal">Szerkesztés</button>
-              <button onClick={() => handleDelete(m._id)} className="icon-btn-brutal">Törlés</button>
-            </span>
-          </li>
-        ))}
-      </ul>
+              <span className="flex items-center gap-2">
+                <span className={m.isActive ? 'status-active' : 'status-expired'}>
+                  {m.isActive ? 'Aktív' : 'Lejárt'}
+                </span>
+                <button onClick={() => startEdit(m)} className="icon-btn-brutal">Szerkesztés</button>
+                <button onClick={() => handleDelete(m._id)} className="icon-btn-brutal">Törlés</button>
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

@@ -6,12 +6,17 @@ function UsersPage() {
   const [form, setForm] = useState({ name: '', email: '' });
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
   const loadUsers = async () => {
+    setLoading(true);
     try {
       setUsers(await api.getUsers());
     } catch (err) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -21,6 +26,7 @@ function UsersPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     try {
       if (editingId) {
         await api.updateUser(editingId, form);
@@ -32,6 +38,8 @@ function UsersPage() {
       await loadUsers();
     } catch (err) {
       setError(err.message);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -76,30 +84,36 @@ function UsersPage() {
           required
         />
         <div className="flex gap-2">
-          <button className="btn-brutal flex-1">
-            {editingId ? 'Mentés' : 'Vendég felvétele'}
+          <button className="btn-brutal flex-1" disabled={submitting}>
+            {submitting ? 'Mentés...' : editingId ? 'Mentés' : 'Vendég felvétele'}
           </button>
           {editingId && (
-            <button type="button" onClick={cancelEdit} className="icon-btn-brutal">
-              Mégse
-            </button>
+            <button type="button" onClick={cancelEdit} className="icon-btn-brutal">Mégse</button>
           )}
         </div>
       </form>
 
       {error && <p className="status-expired mb-4">{error}</p>}
 
-      <ul className="flex flex-col gap-2">
-        {users.map((u) => (
-          <li key={u._id} className="card-brutal flex justify-between items-center">
-            <span>{u.name} — {u.email}</span>
-            <span className="flex gap-2">
-              <button onClick={() => startEdit(u)} className="icon-btn-brutal">Szerkesztés</button>
-              <button onClick={() => handleDelete(u._id)} className="icon-btn-brutal">Törlés</button>
-            </span>
-          </li>
-        ))}
-      </ul>
+      {loading && <p style={{ color: 'var(--color-ash)' }}>Betöltés...</p>}
+
+      {!loading && users.length === 0 && (
+        <p style={{ color: 'var(--color-ash)' }}>Még nincs felvéve vendég.</p>
+      )}
+
+      {!loading && users.length > 0 && (
+        <ul className="flex flex-col gap-2">
+          {users.map((u) => (
+            <li key={u._id} className="card-brutal flex justify-between items-center">
+              <span>{u.name} — {u.email}</span>
+              <span className="flex gap-2">
+                <button onClick={() => startEdit(u)} className="icon-btn-brutal">Szerkesztés</button>
+                <button onClick={() => handleDelete(u._id)} className="icon-btn-brutal">Törlés</button>
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

@@ -3,6 +3,7 @@ const cors = require('cors');
 const userRoutes = require('./routes/userRoutes');
 const membershipRoutes = require('./routes/membershipRoutes');
 const workoutPlanRoutes = require('./routes/workoutPlanRoutes');
+const foodEntryRoutes = require('./routes/foodEntryRoutes');
 const app = express();
 
 app.use(cors());
@@ -15,5 +16,6 @@ app.get('/api/health', (req, res) => {
 app.use('/api/users', userRoutes);
 app.use('/api/memberships', membershipRoutes);
 app.use('/api/workout-plans', workoutPlanRoutes);
+app.use('/api/food-entries', foodEntryRoutes);
 
 module.exports = app;

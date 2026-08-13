@@ -28,4 +28,8 @@ export const api = {
   createWorkoutPlan: (data) => request('/workout-plans', { method: 'POST', body: JSON.stringify(data) }),
   updateWorkoutPlan: (id, data) => request(`/workout-plans/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
   deleteWorkoutPlan: (id) => request(`/workout-plans/${id}`, { method: 'DELETE' }),
+
+  getFoodEntries: () => request('/food-entries'),
+  createFoodEntry: (data) => request('/food-entries', { method: 'POST', body: JSON.stringify(data) }),
+  deleteFoodEntry: (id) => request(`/food-entries/${id}`, { method: 'DELETE' }),
 };
